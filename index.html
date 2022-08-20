@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>抖音去水印</title>
+    <meta name="referrer" content="never">
+    <meta charset="UTF-8">
+    <meta content='抖音,短视频,去水印,删水印,原始视频,去LOGO,删LOGO,原视频' name='Keywords'>
+    <meta name="viewport"
+        content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+    <meta content='抖音一键去水印，粘贴抖音分享链接，一键获取原始视频下载地址！' itemprop='description' name='Description'>
+    <link rel="stylesheet" href="static/css/element.css">
+    <style>
+        body,
+        html {
+            padding: 0;
+            margin: 0;
+            background-color: #f5f5f5;
+            overflow: hidden;
+        }
+
+        * {
+            font-family: consolas, PingFang SC, Microsoft YaHei;
+        }
+
+        [v-cloak] {
+            visibility: hidden !important;
+        }
+
+        .search {
+            text-align: center;
+            padding-top: 120px;
+            z-index: 99;
+        }
+
+        .search .form {
+            width: 80%;
+            max-width: 500px;
+            margin-top: 30px;
+        }
+
+        .search .logo {
+            text-align: center;
+            display: block;
+            font-size: 44px;
+            color: #999;
+            font-weight: bold;
+        }
+
+        .search .logo img {
+            width: 400px;
+        }
+
+        .search .link {
+            margin-top: 20px;
+        }
+
+        .success {
+            text-align: center;
+            padding-top: 20px;
+            z-index: 99;
+        }
+        .about{
+            position:fixed;
+            right:20px;
+            left:20px;
+            bottom:30px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app" v-cloak v-loading.fullscreen.lock="fullscreenLoading">
+        <div class="search">
+            <div class="logo">
+                <font color=orangered>D</font>ouyin <font color=orangered>C</font>lear
+            </div>
+            <el-input autoFocus="true" id="keyword" ref="keyword" v-model="keyword" placeholder="请粘贴抖音复制的链接..."
+                class="form" size="large">
+                <el-button slot="append" icon="el-icon-search" @click="doPost">去水印</el-button>
+            </el-input>
+        </div>
+        <div class="success" v-show="successShow">
+            <div style="color: rgb(49, 112, 143);padding: 15px">
+                {{type}}
+              <p v-if="type=='photo'">
+                   {{successMessage}}
+               <p v-if="successMessage!=' '">
+             <!--<img v-for="(item,i) in  successMessage" :src=item  style=""/>-->
+                </p>
+              </p>
+              
+               <p v-if-else="type=='movie'">
+                    {{successMessage}}
+               </p>
+                
+              
+               
+            </div>
+            <el-button v-if="!needRefresh" type="success"><a :href="videoUrl"
+                    style="text-decoration:none;color: #ffffff" target="_blank">查看视频</a></el-button>
+            <el-button v-if="needRefresh" class="copy" type="primary" v-clipboard:copy="videoUrl"
+                v-clipboard:success="onCopySuccess" v-clipboard:error="onCopyError">复制链接</el-button>
+            <el-button type="danger" @click="clear">清空</el-button>
+        </div>
+
+    </div>
+</body>
+<script src="static/js/vue-2.6.10.min.js"></script>
+<script src="static/js/axios.min.js"></script>
+<script src="static/js/element.js"></script>
+<script src="static/js/vue-clipboard.min.js"></script>
+<script>
+    new Vue({
+        el: '#app',
+        data() {
+            return {
+                keyword: '',
+                fullscreenLoading: false,
+                videoUrl: '',
+                successShow: false,
+                successMessage: '',
+                needRefresh: false,
+                type:''
+            }
+        },
+        created() {
+        },
+        updated() { },
+        methods: {
+            doPost() {
+                var that = this;
+                that.fullscreenLoading = true;
+                axios.post('https://www.ujrv.cn/api/apiindex.php?url='+that.keyword)
+                    .then(function (response) {
+                        that.fullscreenLoading = false;
+                        console.log(response.data);
+                        if (response.status == 200) {
+                            that.successShow = true;
+                            that.videoUrl = response.data.message.video_url;
+                            that.successMessage = response.data.message.video_url;
+                            that.type = response.data.message.type;
+                            that.needRefresh = false;
+                        } else if (response.data.code == 301) {
+                            that.successShow = true;
+                            that.videoUrl = response.data.data;
+                            that.successMessage = response.data.msg;
+                            that.needRefresh = true;
+                        } else {
+                            that.$message.error(response.data.msg);
+                        }
+                    })
+                    .
+                    catch(function (error) {
+                        console.log(error)
+                        that.$message.error('出现异常，你可以控制台查看错误');
+                    });
+            },
+            clear() {
+                this.keyword = '';
+                this.successShow = false
+            },
+            onCopySuccess(e) {
+                this.$message({ message: '复制成功！', type: 'success' });
+            },
+            onCopyError(e) {
+                this.$message.error('复制失败！');
+            }
+        }
+    });
+</script>
+
+</html>
