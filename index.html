@@ -132,7 +132,7 @@
             doPost() {
                 var that = this;
                 that.fullscreenLoading = true;
-                axios.post('https://www.ujrv.cn/api/apiindex.php?url='+that.keyword)
+                axios.post('域名自行更换/jxindex.php?url='+that.keyword)
                     .then(function (response) {
                         that.fullscreenLoading = false;
                         console.log(response.data);
